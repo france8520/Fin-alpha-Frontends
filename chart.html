@@ -214,6 +214,8 @@
   </div>
 
   <div class="period-group" id="period-group">
+    <button class="period-btn" data-period="1d">1D</button>
+    <button class="period-btn" data-period="1wk">1W</button>
     <button class="period-btn" data-period="1mo">1M</button>
     <button class="period-btn" data-period="3mo">3M</button>
     <button class="period-btn" data-period="6mo">6M</button>
@@ -300,10 +302,17 @@ const CHART_OPTS = {
   layout: { background: { color: '#0d1526' }, textColor: '#4a6080' },
   grid:   { vertLines: { color: '#1a2d4a' }, horzLines: { color: '#1a2d4a' } },
   crosshair: { mode: 1 },
-  timeScale: { borderColor: '#1a2d4a', timeVisible: true },
+  timeScale: { borderColor: '#1a2d4a', timeVisible: true, secondsVisible: false },
   rightPriceScale: { borderColor: '#1a2d4a' },
   handleScroll: { mouseWheel: true, pressedMouseMove: true },
   handleScale:  { mouseWheel: true, pinch: true },
+  localization: { timeFormatter: t => {
+    const d = typeof t === 'string' ? new Date(t.replace(' ', 'T')) : new Date(t * 1000);
+    const intraday = ['1d','1wk'].includes(currentPeriod);
+    return intraday
+      ? d.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+      : d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }},
 };
 
 // ── Init charts ──────────────────────────────────────────────────────────────
@@ -393,7 +402,9 @@ function updateTooltip(param) {
   const candle = param.seriesData.get(candleSeries);
   if (!candle) { tooltip.style.display = 'none'; return; }
 
-  const date = typeof param.time === 'string' ? param.time
+  const isIntraday = ['1d','1wk'].includes(currentPeriod);
+  const date = typeof param.time === 'string'
+    ? (isIntraday ? param.time : param.time.slice(0,10))
     : new Date(param.time * 1000).toISOString().slice(0,10);
 
   const o = candle.open?.toFixed(2), h = candle.high?.toFixed(2);
@@ -425,46 +436,50 @@ function updateTooltip(param) {
 
 // ── Populate charts ──────────────────────────────────────────────────────────
 function populateCharts(data) {
-  const toTime = d => d; // date string works fine
+  // lightweight-charts: unix timestamp for intraday, 'YYYY-MM-DD' string for daily
+  const toTime = d => typeof d === 'number' ? d : d;
 
-  const candles = data.map(d => ({
-    time: toTime(d.date),
-    open: d.open, high: d.high, low: d.low, close: d.close,
-  })).filter(d => d.open && d.close);
+  // t() normalises time: unix number stays as-is, date string stays as-is
+  // lightweight-charts v4 accepts both unix timestamp (number) and 'YYYY-MM-DD' (string)
+  const t = d => d.date;
+
+  const candles = data
+    .map(d => ({ time:t(d), open:d.open, high:d.high, low:d.low, close:d.close }))
+    .filter(d => d.open != null && d.close != null);
 
   candleSeries.setData(candles);
 
   // EMA
-  ema20Series.setData(data.filter(d=>d.ema20).map(d=>({ time:d.date, value:d.ema20 })));
-  ema50Series.setData(data.filter(d=>d.ema50).map(d=>({ time:d.date, value:d.ema50 })));
+  ema20Series.setData(data.filter(d=>d.ema20!=null).map(d=>({ time:t(d), value:d.ema20 })));
+  ema50Series.setData(data.filter(d=>d.ema50!=null).map(d=>({ time:t(d), value:d.ema50 })));
 
   // BB
-  bbUpperSeries.setData(data.filter(d=>d.bb_upper).map(d=>({ time:d.date, value:d.bb_upper })));
-  bbMidSeries.setData(  data.filter(d=>d.bb_mid).map(d=>({ time:d.date, value:d.bb_mid })));
-  bbLowerSeries.setData(data.filter(d=>d.bb_lower).map(d=>({ time:d.date, value:d.bb_lower })));
+  bbUpperSeries.setData(data.filter(d=>d.bb_upper!=null).map(d=>({ time:t(d), value:d.bb_upper })));
+  bbMidSeries.setData(  data.filter(d=>d.bb_mid!=null).map(d=>({ time:t(d), value:d.bb_mid })));
+  bbLowerSeries.setData(data.filter(d=>d.bb_lower!=null).map(d=>({ time:t(d), value:d.bb_lower })));
 
-  // Volume (colour by up/down)
+  // Volume
   volSeries.setData(data.filter(d=>d.volume).map(d => ({
-    time: d.date, value: d.volume,
+    time: t(d), value: d.volume,
     color: (d.close >= d.open) ? 'rgba(0,212,170,0.5)' : 'rgba(255,77,109,0.5)',
   })));
-  volMaSeries.setData(data.filter(d=>d.vol_sma20).map(d=>({ time:d.date, value:d.vol_sma20 })));
+  volMaSeries.setData(data.filter(d=>d.vol_sma20!=null).map(d=>({ time:t(d), value:d.vol_sma20 })));
 
-  // RSI + reference lines
+  // RSI
   const rsiData = data.filter(d=>d.rsi!=null);
-  rsiSeries.setData(rsiData.map(d=>({ time:d.date, value:d.rsi })));
+  rsiSeries.setData(rsiData.map(d=>({ time:t(d), value:d.rsi })));
   if (rsiData.length) {
-    rsi70Series.setData(rsiData.map(d=>({ time:d.date, value:70 })));
-    rsi30Series.setData(rsiData.map(d=>({ time:d.date, value:30 })));
+    rsi70Series.setData(rsiData.map(d=>({ time:t(d), value:70 })));
+    rsi30Series.setData(rsiData.map(d=>({ time:t(d), value:30 })));
   }
 
   // MACD
   macdHistSeries.setData(data.filter(d=>d.macd_hist!=null).map(d=>({
-    time: d.date, value: d.macd_hist,
+    time: t(d), value: d.macd_hist,
     color: d.macd_hist >= 0 ? 'rgba(0,212,170,0.7)' : 'rgba(255,77,109,0.7)',
   })));
-  macdSeries.setData(data.filter(d=>d.macd!=null).map(d=>({ time:d.date, value:d.macd })));
-  macdSignalSeries.setData(data.filter(d=>d.macd_signal!=null).map(d=>({ time:d.date, value:d.macd_signal })));
+  macdSeries.setData(data.filter(d=>d.macd!=null).map(d=>({ time:t(d), value:d.macd })));
+  macdSignalSeries.setData(data.filter(d=>d.macd_signal!=null).map(d=>({ time:t(d), value:d.macd_signal })));
 
   // Fit all
   [mainChart, volChart, rsiChart, macdChart].forEach(c => c.timeScale().fitContent());
