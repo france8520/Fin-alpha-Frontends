@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinAlpha Chart</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+
+  <style>
+    :root {
+      --bg:       #060b14;
+      --surface:  #0d1526;
+      --surface2: #111d35;
+      --border:   #1a2d4a;
+      --text:     #e2e8f0;
+      --muted:    #4a6080;
+      --green:    #00d4aa;
+      --red:      #ff4d6d;
+      --blue:     #3b9eff;
+      --yellow:   #ffc53d;
+      --purple:   #a78bfa;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Navbar ── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      flex-wrap: wrap;
+    }
+    .brand { font-weight: 700; font-size: 1.1rem; color: var(--green); white-space: nowrap; display:flex; align-items:center; gap:6px; }
+    .ticker-search {
+      display: flex; align-items: center;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      flex: 1; min-width: 220px; max-width: 340px;
+    }
+    .ticker-search input {
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'DM Mono', monospace;
+      font-size: 0.9rem; padding: 8px 12px; width: 100%;
+      text-transform: uppercase;
+    }
+    .ticker-search button {
+      background: var(--green); border: none; color: #060b14;
+      font-weight: 700; padding: 8px 16px; cursor: pointer;
+      font-size: 0.85rem; transition: opacity .2s;
+    }
+    .ticker-search button:hover { opacity: .85; }
+
+    /* Period buttons */
+    .period-group { display: flex; gap: 4px; }
+    .period-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted); border-radius: 6px;
+      padding: 5px 12px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: all .2s; font-family: 'DM Mono', monospace;
+    }
+    .period-btn:hover { border-color: var(--green); color: var(--green); }
+    .period-btn.active { background: var(--green); border-color: var(--green); color: #060b14; }
+
+    /* Indicator toggles */
+    .ind-toggles { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ind-btn {
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px;
+      font-size: 0.72rem; font-weight: 600; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .ind-btn[data-active="true"]  { opacity: 1; }
+    .ind-btn[data-active="false"] { opacity: .4; }
+
+    /* ── Price header ── */
+    .price-header {
+      display: flex; align-items: baseline; gap: 16px;
+      padding: 12px 20px 4px;
+      flex-wrap: wrap;
+    }
+    .ticker-name { font-size: 1.4rem; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--blue); }
+    .price-big { font-size: 2rem; font-weight: 700; font-family: 'DM Mono', monospace; }
+    .change-badge {
+      font-size: 0.9rem; font-weight: 600; padding: 3px 10px;
+      border-radius: 20px; font-family: 'DM Mono', monospace;
+    }
+    .up   { color: var(--green); }
+    .down { color: var(--red); }
+    .badge-up   { background: rgba(0,212,170,.15); color: var(--green); }
+    .badge-down { background: rgba(255,77,109,.15); color: var(--red); }
+
+    .meta-stats { display: flex; gap: 20px; padding: 4px 20px 12px; flex-wrap: wrap; }
+    .meta-stat { font-size: 0.78rem; color: var(--muted); }
+    .meta-stat span { color: var(--text); font-family: 'DM Mono', monospace; margin-left: 4px; }
+
+    /* ── Charts ── */
+    .chart-wrap { padding: 0 12px; }
+    .chart-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .chart-panel-label {
+      position: absolute; top: 8px; left: 12px; z-index: 10;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--muted);
+      pointer-events: none;
+    }
+    #main-chart  { width: 100%; height: 420px; }
+    #vol-chart   { width: 100%; height: 120px; }
+    #rsi-chart   { width: 100%; height: 120px; }
+    #macd-chart  { width: 100%; height: 130px; }
+
+    /* ── Crosshair tooltip ── */
+    #crosshair-tooltip {
+      position: absolute; z-index: 200;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px;
+      font-size: 0.75rem; pointer-events: none;
+      display: none;
+      font-family: 'DM Mono', monospace;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+    #crosshair-tooltip .tt-date { color: var(--muted); margin-bottom: 4px; font-size: .7rem; }
+    #crosshair-tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; }
+    #crosshair-tooltip .tt-label { color: var(--muted); }
+    #crosshair-tooltip .tt-val   { font-weight: 600; }
+
+    /* ── Loading ── */
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(6,11,20,.85);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 999; gap: 16px;
+    }
+    .loading-overlay.hidden { display: none; }
+    .loading-spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: .9rem; color: var(--muted); }
+
+    /* ── Error ── */
+    .error-bar {
+      margin: 8px 20px;
+      padding: 10px 16px;
+      background: rgba(255,77,109,.1);
+      border: 1px solid rgba(255,77,109,.3);
+      border-radius: 8px; color: #ff8fa3;
+      font-size: .85rem; display: none;
+    }
+
+    /* ── Legend ── */
+    .legend-row {
+      display: flex; gap: 14px; padding: 4px 12px 8px;
+      font-size: 0.72rem; flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 3px; border-radius: 2px; }
+
+    /* ── Back link ── */
+    .back-link {
+      color: var(--muted); font-size: .82rem;
+      text-decoration: none; display: flex; align-items: center; gap: 4px;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* RSI zones labels */
+    .rsi-label-70, .rsi-label-30 {
+      position: absolute; right: 6px; font-size: .62rem;
+      font-family: 'DM Mono', monospace; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Loading chart data…</div>
+</div>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <a href="index.html" class="back-link"><i class="bi bi-arrow-left"></i> Back</a>
+  <div class="brand">
+    <i class="bi bi-activity"></i> FinAlpha Chart
+  </div>
+
+  <div class="ticker-search">
+    <input type="text" id="ticker-input" value="AAPL" placeholder="AAPL, TSLA, BTC-USD…" maxlength="10"/>
+    <button onclick="loadChart()"><i class="bi bi-search"></i></button>
+  </div>
+
+  <div class="period-group" id="period-group">
+    <button class="period-btn" data-period="1mo">1M</button>
+    <button class="period-btn" data-period="3mo">3M</button>
+    <button class="period-btn" data-period="6mo">6M</button>
+    <button class="period-btn active" data-period="1y">1Y</button>
+    <button class="period-btn" data-period="2y">2Y</button>
+    <button class="period-btn" data-period="5y">5Y</button>
+  </div>
+
+  <div class="ind-toggles">
+    <button class="ind-btn" data-ind="ema" data-active="true"  style="border-color:#3b9eff;color:#3b9eff"  onclick="toggleIndicator('ema')">EMA 20/50</button>
+    <button class="ind-btn" data-ind="bb"  data-active="false" style="border-color:#a78bfa;color:#a78bfa" onclick="toggleIndicator('bb')">Bollinger</button>
+    <button class="ind-btn" data-ind="vol" data-active="true"  style="border-color:#ffc53d;color:#ffc53d" onclick="toggleIndicator('vol')">Volume</button>
+    <button class="ind-btn" data-ind="rsi" data-active="true"  style="border-color:#00d4aa;color:#00d4aa" onclick="toggleIndicator('rsi')">RSI</button>
+    <button class="ind-btn" data-ind="macd" data-active="true" style="border-color:#ff4d6d;color:#ff4d6d" onclick="toggleIndicator('macd')">MACD</button>
+  </div>
+</div>
+
+<!-- Error bar -->
+<div class="error-bar" id="error-bar"></div>
+
+<!-- Price header -->
+<div class="price-header" id="price-header" style="display:none">
+  <div class="ticker-name" id="ph-ticker">—</div>
+  <div class="price-big" id="ph-price">—</div>
+  <div class="change-badge" id="ph-change">—</div>
+</div>
+<div class="meta-stats" id="meta-stats" style="display:none">
+  <div class="meta-stat">52W High<span id="ms-high">—</span></div>
+  <div class="meta-stat">52W Low<span id="ms-low">—</span></div>
+  <div class="meta-stat">Avg Vol<span id="ms-vol">—</span></div>
+  <div class="meta-stat">Period<span id="ms-period">—</span></div>
+</div>
+
+<!-- Charts -->
+<div class="chart-wrap">
+
+  <!-- Main candle chart -->
+  <div class="chart-panel">
+    <div class="chart-panel-label">PRICE</div>
+    <div id="crosshair-tooltip"></div>
+    <div id="main-chart"></div>
+    <div class="legend-row" id="main-legend"></div>
+  </div>
+
+  <!-- Volume -->
+  <div class="chart-panel" id="vol-panel">
+    <div class="chart-panel-label">VOLUME</div>
+    <div id="vol-chart"></div>
+  </div>
+
+  <!-- RSI -->
+  <div class="chart-panel" id="rsi-panel">
+    <div class="chart-panel-label">RSI (14)</div>
+    <div id="rsi-chart"></div>
+  </div>
+
+  <!-- MACD -->
+  <div class="chart-panel" id="macd-panel">
+    <div class="chart-panel-label">MACD (12,26,9)</div>
+    <div id="macd-chart"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const API_BASE = localStorage.getItem('finalphaApiUrl') || 'http://localhost:8000';
+let currentPeriod = '1y';
+let chartData = [];
+
+// indicator series refs
+let candleSeries, ema20Series, ema50Series;
+let bbUpperSeries, bbLowerSeries, bbMidSeries;
+let volSeries, volMaSeries;
+let rsiSeries, rsi70Series, rsi30Series;
+let macdSeries, macdSignalSeries, macdHistSeries;
+
+// chart instances
+let mainChart, volChart, rsiChart, macdChart;
+
+// ── LightweightCharts theme ───────────────────────────────────────────────────
+const CHART_OPTS = {
+  layout: { background: { color: '#0d1526' }, textColor: '#4a6080' },
+  grid:   { vertLines: { color: '#1a2d4a' }, horzLines: { color: '#1a2d4a' } },
+  crosshair: { mode: 1 },
+  timeScale: { borderColor: '#1a2d4a', timeVisible: true },
+  rightPriceScale: { borderColor: '#1a2d4a' },
+  handleScroll: { mouseWheel: true, pressedMouseMove: true },
+  handleScale:  { mouseWheel: true, pinch: true },
+};
+
+// ── Init charts ──────────────────────────────────────────────────────────────
+function initCharts() {
+  // destroy old
+  [mainChart, volChart, rsiChart, macdChart].forEach(c => c && c.remove());
+
+  mainChart = LightweightCharts.createChart(document.getElementById('main-chart'), {
+    ...CHART_OPTS, height: 420,
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+  });
+
+  volChart = LightweightCharts.createChart(document.getElementById('vol-chart'), {
+    ...CHART_OPTS, height: 120,
+    rightPriceScale: { borderColor: '#1a2d4a', scaleMargins: { top: 0.1, bottom: 0 } },
+  });
+
+  rsiChart = LightweightCharts.createChart(document.getElementById('rsi-chart'), {
+    ...CHART_OPTS, height: 120,
+    rightPriceScale: { borderColor: '#1a2d4a', scaleMargins: { top: 0.1, bottom: 0.1 } },
+  });
+
+  macdChart = LightweightCharts.createChart(document.getElementById('macd-chart'), {
+    ...CHART_OPTS, height: 130,
+    rightPriceScale: { borderColor: '#1a2d4a', scaleMargins: { top: 0.1, bottom: 0.1 } },
+  });
+
+  // sync time scales
+  const syncCharts = [mainChart, volChart, rsiChart, macdChart];
+  syncCharts.forEach(c => {
+    c.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      if (!range) return;
+      syncCharts.forEach(other => {
+        if (other !== c) other.timeScale().setVisibleLogicalRange(range);
+      });
+    });
+  });
+
+  // Crosshair sync
+  syncCharts.forEach(src => {
+    src.subscribeCrosshairMove(param => {
+      syncCharts.forEach(other => {
+        if (other !== src && param.time) {
+          other.setCrosshairPosition(param.point?.x ?? NaN, param.point?.y ?? NaN, other.series?.[0]);
+        }
+      });
+      updateTooltip(param);
+    });
+  });
+
+  // ── Candle series ──
+  candleSeries = mainChart.addCandlestickSeries({
+    upColor: '#00d4aa', downColor: '#ff4d6d',
+    wickUpColor: '#00d4aa', wickDownColor: '#ff4d6d',
+    borderVisible: false,
+  });
+
+  // ── EMA ──
+  ema20Series = mainChart.addLineSeries({ color: '#3b9eff', lineWidth: 1.5, title: 'EMA20' });
+  ema50Series = mainChart.addLineSeries({ color: '#ffc53d', lineWidth: 1.5, title: 'EMA50' });
+
+  // ── Bollinger ──
+  bbUpperSeries = mainChart.addLineSeries({ color: 'rgba(167,139,250,0.6)', lineWidth: 1, title: 'BB Upper', lineStyle: 2 });
+  bbMidSeries   = mainChart.addLineSeries({ color: 'rgba(167,139,250,0.4)', lineWidth: 1, title: 'BB Mid',   lineStyle: 2 });
+  bbLowerSeries = mainChart.addLineSeries({ color: 'rgba(167,139,250,0.6)', lineWidth: 1, title: 'BB Lower', lineStyle: 2 });
+
+  // ── Volume ──
+  volSeries   = volChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
+  volMaSeries = volChart.addLineSeries({ color: '#ffc53d', lineWidth: 1.5, title: 'Vol MA20' });
+
+  // ── RSI ──
+  rsiSeries    = rsiChart.addLineSeries({ color: '#00d4aa', lineWidth: 2, title: 'RSI' });
+  rsi70Series  = rsiChart.addLineSeries({ color: 'rgba(255,77,109,0.4)', lineWidth: 1, lineStyle: 2 });
+  rsi30Series  = rsiChart.addLineSeries({ color: 'rgba(0,212,170,0.4)',  lineWidth: 1, lineStyle: 2 });
+
+  // ── MACD ──
+  macdHistSeries   = macdChart.addHistogramSeries({ color: '#00d4aa', priceScaleId: 'right' });
+  macdSeries       = macdChart.addLineSeries({ color: '#3b9eff', lineWidth: 1.5, title: 'MACD' });
+  macdSignalSeries = macdChart.addLineSeries({ color: '#ff4d6d',  lineWidth: 1.5, title: 'Signal' });
+}
+
+// ── Tooltip ──────────────────────────────────────────────────────────────────
+function updateTooltip(param) {
+  const tooltip = document.getElementById('crosshair-tooltip');
+  if (!param.time || !param.seriesData) { tooltip.style.display = 'none'; return; }
+
+  const candle = param.seriesData.get(candleSeries);
+  if (!candle) { tooltip.style.display = 'none'; return; }
+
+  const date = typeof param.time === 'string' ? param.time
+    : new Date(param.time * 1000).toISOString().slice(0,10);
+
+  const o = candle.open?.toFixed(2), h = candle.high?.toFixed(2);
+  const l = candle.low?.toFixed(2),  c = candle.close?.toFixed(2);
+  const chg = o ? ((candle.close - candle.open) / candle.open * 100).toFixed(2) : 0;
+  const color = candle.close >= candle.open ? '#00d4aa' : '#ff4d6d';
+
+  tooltip.innerHTML = `
+    <div class="tt-date">${date}</div>
+    <div class="tt-row"><span class="tt-label">O</span><span class="tt-val" style="color:${color}">${o}</span></div>
+    <div class="tt-row"><span class="tt-label">H</span><span class="tt-val" style="color:#00d4aa">${h}</span></div>
+    <div class="tt-row"><span class="tt-label">L</span><span class="tt-val" style="color:#ff4d6d">${l}</span></div>
+    <div class="tt-row"><span class="tt-label">C</span><span class="tt-val" style="color:${color}">${c}</span></div>
+    <div class="tt-row"><span class="tt-label">%</span><span class="tt-val" style="color:${color}">${chg > 0 ? '+' : ''}${chg}%</span></div>
+  `;
+
+  const container = document.getElementById('main-chart');
+  const rect = container.getBoundingClientRect();
+  let x = (param.point?.x ?? 0) + rect.left + window.scrollX + 16;
+  let y = (param.point?.y ?? 0) + rect.top  + window.scrollY + 16;
+  if (x + 130 > window.innerWidth)  x -= 150;
+  if (y + 120 > window.innerHeight) y -= 130;
+
+  tooltip.style.left    = x + 'px';
+  tooltip.style.top     = y + 'px';
+  tooltip.style.display = 'block';
+  tooltip.style.position = 'fixed';
+}
+
+// ── Populate charts ──────────────────────────────────────────────────────────
+function populateCharts(data) {
+  const toTime = d => d; // date string works fine
+
+  const candles = data.map(d => ({
+    time: toTime(d.date),
+    open: d.open, high: d.high, low: d.low, close: d.close,
+  })).filter(d => d.open && d.close);
+
+  candleSeries.setData(candles);
+
+  // EMA
+  ema20Series.setData(data.filter(d=>d.ema20).map(d=>({ time:d.date, value:d.ema20 })));
+  ema50Series.setData(data.filter(d=>d.ema50).map(d=>({ time:d.date, value:d.ema50 })));
+
+  // BB
+  bbUpperSeries.setData(data.filter(d=>d.bb_upper).map(d=>({ time:d.date, value:d.bb_upper })));
+  bbMidSeries.setData(  data.filter(d=>d.bb_mid).map(d=>({ time:d.date, value:d.bb_mid })));
+  bbLowerSeries.setData(data.filter(d=>d.bb_lower).map(d=>({ time:d.date, value:d.bb_lower })));
+
+  // Volume (colour by up/down)
+  volSeries.setData(data.filter(d=>d.volume).map(d => ({
+    time: d.date, value: d.volume,
+    color: (d.close >= d.open) ? 'rgba(0,212,170,0.5)' : 'rgba(255,77,109,0.5)',
+  })));
+  volMaSeries.setData(data.filter(d=>d.vol_sma20).map(d=>({ time:d.date, value:d.vol_sma20 })));
+
+  // RSI + reference lines
+  const rsiData = data.filter(d=>d.rsi!=null);
+  rsiSeries.setData(rsiData.map(d=>({ time:d.date, value:d.rsi })));
+  if (rsiData.length) {
+    rsi70Series.setData(rsiData.map(d=>({ time:d.date, value:70 })));
+    rsi30Series.setData(rsiData.map(d=>({ time:d.date, value:30 })));
+  }
+
+  // MACD
+  macdHistSeries.setData(data.filter(d=>d.macd_hist!=null).map(d=>({
+    time: d.date, value: d.macd_hist,
+    color: d.macd_hist >= 0 ? 'rgba(0,212,170,0.7)' : 'rgba(255,77,109,0.7)',
+  })));
+  macdSeries.setData(data.filter(d=>d.macd!=null).map(d=>({ time:d.date, value:d.macd })));
+  macdSignalSeries.setData(data.filter(d=>d.macd_signal!=null).map(d=>({ time:d.date, value:d.macd_signal })));
+
+  // Fit all
+  [mainChart, volChart, rsiChart, macdChart].forEach(c => c.timeScale().fitContent());
+
+  // Legend
+  document.getElementById('main-legend').innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:#3b9eff"></div>EMA20</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ffc53d"></div>EMA50</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>BB</div>
+  `;
+}
+
+// ── Toggle indicators ────────────────────────────────────────────────────────
+function toggleIndicator(ind) {
+  const btn = document.querySelector(`[data-ind="${ind}"]`);
+  const active = btn.dataset.active === 'true';
+  btn.dataset.active = (!active).toString();
+
+  const show = !active;
+
+  const setVis = (series, v) => series && series.applyOptions({ visible: v });
+
+  if (ind === 'ema') {
+    setVis(ema20Series, show); setVis(ema50Series, show);
+  }
+  if (ind === 'bb') {
+    setVis(bbUpperSeries, show); setVis(bbMidSeries, show); setVis(bbLowerSeries, show);
+  }
+  if (ind === 'vol') {
+    document.getElementById('vol-panel').style.display = show ? '' : 'none';
+  }
+  if (ind === 'rsi') {
+    document.getElementById('rsi-panel').style.display = show ? '' : 'none';
+  }
+  if (ind === 'macd') {
+    document.getElementById('macd-panel').style.display = show ? '' : 'none';
+  }
+}
+
+// ── Period select ────────────────────────────────────────────────────────────
+document.getElementById('period-group').addEventListener('click', e => {
+  const btn = e.target.closest('.period-btn');
+  if (!btn) return;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPeriod = btn.dataset.period;
+  loadChart();
+});
+
+// ── Load chart data ──────────────────────────────────────────────────────────
+async function loadChart() {
+  const ticker = document.getElementById('ticker-input').value.trim().toUpperCase();
+  if (!ticker) return;
+
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('loading-text').textContent = `Loading ${ticker}…`;
+  document.getElementById('error-bar').style.display = 'none';
+  document.getElementById('price-header').style.display = 'none';
+  document.getElementById('meta-stats').style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/chart/${encodeURIComponent(ticker)}?period=${currentPeriod}`);
+    const json = await res.json();
+
+    if (!res.ok) throw new Error(json.detail || 'Failed to load data');
+
+    chartData = json.data;
+    initCharts();
+    populateCharts(chartData);
+
+    // Price header
+    const up = json.change_pct >= 0;
+    document.getElementById('ph-ticker').textContent  = json.ticker;
+    document.getElementById('ph-price').textContent   = `$${json.current_price?.toFixed(2)}`;
+    document.getElementById('ph-change').textContent  = `${up ? '+' : ''}${json.change_pct}%`;
+    document.getElementById('ph-change').className    = `change-badge ${up ? 'badge-up' : 'badge-down'}`;
+    document.getElementById('ms-high').textContent    = `$${json.high_52w?.toFixed(2)}`;
+    document.getElementById('ms-low').textContent     = `$${json.low_52w?.toFixed(2)}`;
+    document.getElementById('ms-vol').textContent     = formatVolume(json.avg_volume);
+    document.getElementById('ms-period').textContent  = currentPeriod.toUpperCase();
+    document.getElementById('price-header').style.display = 'flex';
+    document.getElementById('meta-stats').style.display   = 'flex';
+
+    // update page title
+    document.title = `${ticker} — FinAlpha Chart`;
+    history.replaceState({}, '', `?ticker=${ticker}&period=${currentPeriod}`);
+
+  } catch (err) {
+    const bar = document.getElementById('error-bar');
+    bar.textContent = `⚠ ${err.message}`;
+    bar.style.display = 'block';
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+function formatVolume(v) {
+  if (!v) return '—';
+  if (v >= 1e9) return (v/1e9).toFixed(1) + 'B';
+  if (v >= 1e6) return (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return (v/1e3).toFixed(0) + 'K';
+  return v.toString();
+}
+
+// ── Enter key ────────────────────────────────────────────────────────────────
+document.getElementById('ticker-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadChart();
+  document.getElementById('ticker-input').value = document.getElementById('ticker-input').value.toUpperCase();
+});
+
+// ── Handle resize ────────────────────────────────────────────────────────────
+const resizeObserver = new ResizeObserver(() => {
+  [
+    [mainChart,  'main-chart'],
+    [volChart,   'vol-chart'],
+    [rsiChart,   'rsi-chart'],
+    [macdChart,  'macd-chart'],
+  ].forEach(([chart, id]) => {
+    if (!chart) return;
+    const el = document.getElementById(id);
+    chart.applyOptions({ width: el.clientWidth });
+  });
+});
+resizeObserver.observe(document.body);
+
+// ── Read URL params & init ────────────────────────────────────────────────────
+const params = new URLSearchParams(location.search);
+if (params.get('ticker')) {
+  document.getElementById('ticker-input').value = params.get('ticker').toUpperCase();
+}
+if (params.get('period')) {
+  currentPeriod = params.get('period');
+  document.querySelectorAll('.period-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.period === currentPeriod);
+  });
+}
+
+loadChart();
+</script>
+</body>
+</html>
