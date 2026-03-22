@@ -1,0 +1,215 @@
+.section {
+  padding: var(--section-pad) 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Toggle */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.toggleLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  transition: color 0.2s;
+}
+
+.toggleActive { color: var(--text-primary); }
+
+.switch {
+  width: 48px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 3px;
+  transition: background 0.3s;
+  position: relative;
+}
+
+.switchOn {
+  background: var(--gradient-accent);
+  border-color: transparent;
+}
+
+.switchThumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.switchOn .switchThumb {
+  transform: translateX(22px);
+}
+
+.saveBadge {
+  padding: 3px 10px;
+  background: hsla(152,70%,50%,0.15);
+  color: hsl(152,70%,55%);
+  border: 1px solid hsla(152,70%,50%,0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px 28px;
+  position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.card.popular {
+  border-color: hsla(210,100%,60%,0.4);
+  background: linear-gradient(135deg, hsla(210,100%,60%,0.06), hsla(172,80%,50%,0.04));
+  box-shadow: 0 0 40px hsla(210,100%,60%,0.08);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gradient-accent);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 16px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  letter-spacing: 0.04em;
+}
+
+.cardHead {
+  margin-bottom: 28px;
+}
+
+.planName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.price {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.currency {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  padding-bottom: 6px;
+}
+
+.amount {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.period {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  padding-bottom: 6px;
+}
+
+.features {
+  list-style: none;
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.check { color: var(--accent); flex-shrink: 0; }
+
+.cta {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.ctaPrimary {
+  background: var(--gradient-accent);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 20px hsla(210,100%,60%,0.3);
+}
+
+.ctaPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px hsla(210,100%,60%,0.4);
+}
+
+.ctaOutline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+}
+
+.ctaOutline:hover {
+  background: var(--bg-glass);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+}

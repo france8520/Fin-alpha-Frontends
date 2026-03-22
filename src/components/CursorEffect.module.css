@@ -1,0 +1,34 @@
+.spotlight {
+  position: fixed;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsla(210,100%,60%,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+}
+
+.ring {
+  position: fixed;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid hsla(210, 100%, 70%, 0.5);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.ring.hovered {
+  width: 44px;
+  height: 44px;
+  background: hsla(210, 100%, 75%, 0.1);
+  border-color: transparent;
+  box-shadow: 0 0 20px hsla(210, 100%, 75%, 0.2);
+}
+
+@media (hover: none) {
+  .spotlight, .ring { display: none; }
+}
