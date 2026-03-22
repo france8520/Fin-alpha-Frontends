@@ -1,4 +1,3 @@
-import { Facebook } from 'lucide-react'
 import styles from './Footer.module.css'
 
 const handleNavClick = (e, href) => {

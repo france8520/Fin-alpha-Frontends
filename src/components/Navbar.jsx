@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { Menu, Moon, Sun, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTheme } from '../hooks/useTheme'
-import { Sun, Moon, Menu, X } from 'lucide-react'
 import styles from './Navbar.module.css'
 
 export default function Navbar() {
@@ -9,8 +9,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50)
+    const onScroll = () => setScrolled(window.scrollY > 0)
     window.addEventListener('scroll', onScroll)
+    onScroll() // Trigger on mount
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 

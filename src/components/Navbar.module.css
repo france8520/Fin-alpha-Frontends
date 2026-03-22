@@ -5,14 +5,18 @@
   height: var(--nav-height);
   display: flex;
   align-items: center;
+  background: rgba(var(--bg-primary-rgb, 10,12,18), 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
   transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease;
 }
 
 .navbar.scrolled {
-  background: rgba(var(--bg-primary-rgb, 10,12,18), 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 1px 0 var(--border);
+  background: rgba(var(--bg-primary-rgb, 10,12,18), 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.15);
 }
 
 [data-theme="dark"] .navbar.scrolled {

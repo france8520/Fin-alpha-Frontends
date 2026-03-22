@@ -1,0 +1,31 @@
+.cubeContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: transparent;
+}
+
+.cubeContainer svg {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  max-height: 500px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 60px rgba(100, 180, 255, 0.1));
+}
+
+@media (max-width: 1024px) {
+  .cubeContainer svg {
+    max-width: 400px;
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cubeContainer {
+    display: none;
+  }
+}

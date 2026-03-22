@@ -1,5 +1,6 @@
 import { ArrowDown, Play, Star } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import AnimatedCube from './AnimatedCube'
 import styles from './Hero.module.css'
 
 const TICKER_DATA = [
@@ -146,6 +147,9 @@ export default function Hero() {
           </div>
         </div>
 
+        <div className={styles.cubeWrapper}>
+          <AnimatedCube />
+        </div>
       </div>
     </section>
   )
