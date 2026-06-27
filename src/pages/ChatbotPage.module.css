@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 340px;
-  background: #071521;
+  background: linear-gradient(135deg, #0c1445 0%, #1a2a6c 50%, #071521 100%);
   color: #edf8ff;
   overflow: hidden;
 }
@@ -17,23 +17,31 @@
   z-index: 1;
   min-height: 100vh;
   padding: 24px;
-  background: #081927;
-  border-color: rgba(134, 170, 199, 0.16);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(148, 163, 184, 0.25);
 }
 
 .sidebar {
-  border-right: 1px solid rgba(130, 199, 255, 0.14);
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
   display: flex;
   flex-direction: column;
   gap: 22px;
+  margin: 12px;
+  border-radius: 20px;
+  min-height: calc(100vh - 24px);
 }
 
 .insightPanel {
-  border-left: 1px solid rgba(130, 199, 255, 0.14);
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
   display: flex;
   flex-direction: column;
   gap: 18px;
   overflow-y: auto;
+  margin: 12px;
+  border-radius: 20px;
+  min-height: calc(100vh - 24px);
 }
 
 .brand {
@@ -79,9 +87,11 @@
 
 .sideSection,
 .panelCard {
-  border: 1px solid rgba(130, 199, 255, 0.14);
-  background: #0b2031;
-  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
 }
 
 .sideSection {
@@ -188,8 +198,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  border-bottom: 1px solid rgba(130, 199, 255, 0.12);
-  background: #071521;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(7, 21, 33, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin: 12px 12px 0 12px;
+  border-radius: 20px 20px 0 0;
 }
 
 .kicker {
@@ -260,12 +274,17 @@
 }
 
 .userMessage .bubble {
-  background: #12334a;
-  border-color: rgba(96, 165, 250, 0.26);
+  background: rgba(18, 51, 74, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(96, 165, 250, 0.35);
 }
 
 .assistantMessage .bubble {
-  background: #0b2031;
+  background: rgba(11, 32, 49, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(148, 163, 184, 0.3);
 }
 
 .avatar {
@@ -492,10 +511,12 @@
   justify-content: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid rgba(130, 199, 255, 0.13);
-  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
   color: #cce9ff;
-  background: rgba(9, 39, 64, 0.58);
+  background: rgba(9, 39, 64, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   font-size: 0.86rem;
   font-weight: 700;
 }
@@ -518,9 +539,11 @@
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  border: 1px solid rgba(130, 199, 255, 0.22);
-  border-radius: 8px;
-  background: #0b2031;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 16px;
+  background: rgba(11, 32, 49, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .inputWrap svg {
