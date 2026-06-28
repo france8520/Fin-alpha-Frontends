@@ -1,7 +1,6 @@
 import {
   Activity,
   BarChart2,
-  Bot,
   CheckCircle2,
   Compass,
   ExternalLink,
@@ -157,6 +156,24 @@ function LogoMark() {
   )
 }
 
+function SharkFin({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3.2 18.4c3.4.2 5.2-.4 6.7-1.6C8.1 12.9 9.7 7 14.4 3.4c1.4-1.1 1.7-.6 1.4 1-1 5.3.3 9.7 4.7 12.7.9.6.7 1.2-.5 1.4-3.6.6-6.4.2-8.5-1-2.2 1.7-5 2.3-8 1.7-.9-.2-1.1-.8-.3-1z"
+        fill="currentColor"
+      />
+      <path
+        d="M12.6 8.2c.9 1.6 2.3 3 4.1 4.1"
+        stroke="#ffffff"
+        strokeOpacity="0.5"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 function RiskArc({ score = 0 }) {
   const safeScore = Math.max(0, Math.min(100, Number(score) || 0))
   const offset = 157 - (safeScore / 100) * 157
@@ -268,7 +285,7 @@ function MessageBubble({ message }) {
   return (
     <article className={`${styles.message} ${isUser ? styles.userMessage : styles.assistantMessage}`}>
       <div className={styles.avatar} aria-hidden="true">
-        {isUser ? <User size={17} /> : <Bot size={18} />}
+        {isUser ? <User size={17} /> : <SharkFin size={18} />}
       </div>
       <div className={styles.bubble}>
         {message.loading ? (
