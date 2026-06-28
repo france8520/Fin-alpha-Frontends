@@ -156,20 +156,30 @@ function LogoMark() {
   )
 }
 
-function SharkFin({ size = 20 }) {
+function LogoIcon({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="finIconGrad" x1="6" y1="3" x2="42" y2="45" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#60a5fa" />
+          <stop offset="0.55" stopColor="#3b82f6" />
+          <stop offset="1" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id="finIconGloss" x1="14" y1="6" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M24 3.2 41.9 13.6v20.8L24 44.8 6.1 34.4V13.6z" fill="url(#finIconGrad)" />
+      <path d="M24 3.2 41.9 13.6 24 24 6.1 13.6z" fill="url(#finIconGloss)" />
       <path
-        d="M3.2 18.4c3.4.2 5.2-.4 6.7-1.6C8.1 12.9 9.7 7 14.4 3.4c1.4-1.1 1.7-.6 1.4 1-1 5.3.3 9.7 4.7 12.7.9.6.7 1.2-.5 1.4-3.6.6-6.4.2-8.5-1-2.2 1.7-5 2.3-8 1.7-.9-.2-1.1-.8-.3-1z"
-        fill="currentColor"
-      />
-      <path
-        d="M12.6 8.2c.9 1.6 2.3 3 4.1 4.1"
+        d="M14 31 20.5 22.5 25.5 27 33.5 16.5"
         stroke="#ffffff"
-        strokeOpacity="0.5"
-        strokeWidth="1.1"
+        strokeWidth="2.8"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
+      <circle cx="33.5" cy="16.5" r="2.6" fill="#ffffff" />
     </svg>
   )
 }
@@ -285,7 +295,7 @@ function MessageBubble({ message }) {
   return (
     <article className={`${styles.message} ${isUser ? styles.userMessage : styles.assistantMessage}`}>
       <div className={styles.avatar} aria-hidden="true">
-        {isUser ? <User size={17} /> : <SharkFin size={18} />}
+        {isUser ? <User size={17} /> : <LogoIcon size={22} />}
       </div>
       <div className={styles.bubble}>
         {message.loading ? (
