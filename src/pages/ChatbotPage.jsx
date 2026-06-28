@@ -135,18 +135,18 @@ function RiskArc({ score = 0 }) {
   return (
     <div className={styles.riskArc}>
       <svg viewBox="0 0 120 70" role="img" aria-label={`Risk score ${safeScore} out of 100`}>
-        <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(148, 199, 255, 0.16)" strokeWidth="9" strokeLinecap="round" />
+        <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(124, 92, 246, 0.16)" strokeWidth="9" strokeLinecap="round" />
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
-          stroke="#38bdf8"
+          stroke="#7c5cf6"
           strokeWidth="9"
           strokeLinecap="round"
           strokeDasharray="157"
           strokeDashoffset={offset}
         />
-        <text x="60" y="51" textAnchor="middle" fill="#ecf8ff" fontWeight="700" fontSize="20">{safeScore}</text>
-        <text x="60" y="64" textAnchor="middle" fill="#89a9c7" fontSize="7">RISK</text>
+        <text x="60" y="51" textAnchor="middle" fill="#241b3a" fontWeight="700" fontSize="20">{safeScore}</text>
+        <text x="60" y="64" textAnchor="middle" fill="#8a83a0" fontSize="7">RISK</text>
       </svg>
     </div>
   )
