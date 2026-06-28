@@ -1,7 +1,6 @@
 import {
   Activity,
   BarChart2,
-  Bot,
   CheckCircle2,
   Compass,
   ExternalLink,
@@ -19,7 +18,6 @@ import {
   TrendingDown,
   TrendingUp,
   User,
-  Waves,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -128,6 +126,64 @@ function buildAssistantText(result) {
   return `${result.ticker} is trading around $${result.price}. Over the last year it is ${move} ${Math.abs(result.total_return)}%, with ${result.risk_label.toLowerCase()} and ${result.sentiment?.label || 'neutral'} news sentiment. ${result.recommendation}`
 }
 
+function LogoMark() {
+  return (
+    <span className={styles.logoMark} aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none">
+        <defs>
+          <linearGradient id="finLogoGrad" x1="6" y1="3" x2="42" y2="45" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#60a5fa" />
+            <stop offset="0.55" stopColor="#3b82f6" />
+            <stop offset="1" stopColor="#1d4ed8" />
+          </linearGradient>
+          <linearGradient id="finLogoGloss" x1="14" y1="6" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+            <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d="M24 3.2 41.9 13.6v20.8L24 44.8 6.1 34.4V13.6z" fill="url(#finLogoGrad)" />
+        <path d="M24 3.2 41.9 13.6 24 24 6.1 13.6z" fill="url(#finLogoGloss)" />
+        <path
+          d="M14 31 20.5 22.5 25.5 27 33.5 16.5"
+          stroke="#ffffff"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="33.5" cy="16.5" r="2.6" fill="#ffffff" />
+      </svg>
+    </span>
+  )
+}
+
+function LogoIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="finIconGrad" x1="6" y1="3" x2="42" y2="45" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#60a5fa" />
+          <stop offset="0.55" stopColor="#3b82f6" />
+          <stop offset="1" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id="finIconGloss" x1="14" y1="6" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M24 3.2 41.9 13.6v20.8L24 44.8 6.1 34.4V13.6z" fill="url(#finIconGrad)" />
+      <path d="M24 3.2 41.9 13.6 24 24 6.1 13.6z" fill="url(#finIconGloss)" />
+      <path
+        d="M14 31 20.5 22.5 25.5 27 33.5 16.5"
+        stroke="#ffffff"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="33.5" cy="16.5" r="2.6" fill="#ffffff" />
+    </svg>
+  )
+}
+
 function RiskArc({ score = 0 }) {
   const safeScore = Math.max(0, Math.min(100, Number(score) || 0))
   const offset = 157 - (safeScore / 100) * 157
@@ -135,18 +191,18 @@ function RiskArc({ score = 0 }) {
   return (
     <div className={styles.riskArc}>
       <svg viewBox="0 0 120 70" role="img" aria-label={`Risk score ${safeScore} out of 100`}>
-        <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(148, 199, 255, 0.16)" strokeWidth="9" strokeLinecap="round" />
+        <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(37, 99, 235, 0.16)" strokeWidth="9" strokeLinecap="round" />
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
-          stroke="#38bdf8"
+          stroke="#2563eb"
           strokeWidth="9"
           strokeLinecap="round"
           strokeDasharray="157"
           strokeDashoffset={offset}
         />
-        <text x="60" y="51" textAnchor="middle" fill="#ecf8ff" fontWeight="700" fontSize="20">{safeScore}</text>
-        <text x="60" y="64" textAnchor="middle" fill="#89a9c7" fontSize="7">RISK</text>
+        <text x="60" y="51" textAnchor="middle" fill="#0f1e3d" fontWeight="700" fontSize="20">{safeScore}</text>
+        <text x="60" y="64" textAnchor="middle" fill="#8090a8" fontSize="7">RISK</text>
       </svg>
     </div>
   )
@@ -239,7 +295,7 @@ function MessageBubble({ message }) {
   return (
     <article className={`${styles.message} ${isUser ? styles.userMessage : styles.assistantMessage}`}>
       <div className={styles.avatar} aria-hidden="true">
-        {isUser ? <User size={17} /> : <Bot size={18} />}
+        {isUser ? <User size={17} /> : <LogoIcon size={22} />}
       </div>
       <div className={styles.bubble}>
         {message.loading ? (
@@ -372,7 +428,7 @@ export default function ChatbotPage() {
     <main className={styles.page}>
       <aside className={styles.sidebar}>
         <a className={styles.brand} href="/">
-          <img src="/Fin.png" alt="FinAlpha" />
+          <LogoMark />
           <span>FinAlpha</span>
         </a>
 
@@ -416,10 +472,14 @@ export default function ChatbotPage() {
         <header className={styles.topbar}>
           <div>
             <div className={styles.kicker}>
-              <Waves size={16} />
-              Ocean intelligence
+              <Sparkles size={16} />
+              What this AI can do
             </div>
-            <h1>Stock news chatbot</h1>
+            <h1>Your stock research copilot</h1>
+            <p className={styles.subtitle}>
+              I analyze public tickers, map company names to symbols, flag private vs. public status,
+              score risk, and read news sentiment. I don&apos;t give personalized financial advice.
+            </p>
           </div>
           <div className={styles.topbarActions}>
             <button className={styles.iconButton} onClick={() => pingApi().then(setApiStatus)} title="Refresh API status">
