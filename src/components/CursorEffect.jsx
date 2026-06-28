@@ -18,18 +18,18 @@ export default function CursorEffect() {
 
     let animId
     const animate = () => {
-      spot.current.x += (mouse.current.x - spot.current.x) * 0.35
-      spot.current.y += (mouse.current.y - spot.current.y) * 0.35
-      ring.current.x += (mouse.current.x - ring.current.x) * 0.2
-      ring.current.y += (mouse.current.y - ring.current.y) * 0.2
+      // ปรับค่า easing ให้สูงขึ้นเพื่อการเคลื่อนไหวที่สมูทขึ้น
+      spot.current.x += (mouse.current.x - spot.current.x) * 0.15
+      spot.current.y += (mouse.current.y - spot.current.y) * 0.15
+      ring.current.x += (mouse.current.x - ring.current.x) * 0.1
+      ring.current.y += (mouse.current.y - ring.current.y) * 0.1
 
+      // ใช้ transform แทน left/top เพื่อประสิทธิภาพที่ดีขึ้น
       if (spotRef.current) {
-        spotRef.current.style.left = spot.current.x + 'px'
-        spotRef.current.style.top = spot.current.y + 'px'
+        spotRef.current.style.transform = `translate(-50%, -50%) translate3d(${spot.current.x - window.innerWidth/2}px, ${spot.current.y - window.innerHeight/2}px, 0)`
       }
       if (ringRef.current) {
-        ringRef.current.style.left = ring.current.x + 'px'
-        ringRef.current.style.top = ring.current.y + 'px'
+        ringRef.current.style.transform = `translate(-50%, -50%) translate3d(${ring.current.x}px, ${ring.current.y}px, 0)`
       }
 
       animId = requestAnimationFrame(animate)

@@ -7,6 +7,9 @@
   pointer-events: none;
   z-index: 0;
   transform: translate(-50%, -50%);
+  will-change: transform; /* เพิ่มเพื่อเพิ่มประสิทธิภาพ */
+  top: 0;
+  left: 0;
 }
 
 .ring {
@@ -18,7 +21,10 @@
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
+  will-change: transform; /* เพิ่มเพื่อเพิ่มประสิทธิภาพ */
   transition: width 0.2s, height 0.2s, background 0.2s, border-color 0.2s;
+  top: 0;
+  left: 0;
 }
 
 .ring.hovered {
