@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { analyzeStock, getApiBase, pingApi, setApiBase } from '../utils/api'
+import { analyzeStock, chatWithAI, getApiBase, pingApi, setApiBase } from '../utils/api'
 import styles from './ChatbotPage.module.css'
 
 const tickerAliases = {
@@ -63,9 +63,9 @@ const privateCompanyProfiles = [
 
 const starters = [
   'Analyze NVDA and summarize the related news',
-  'Does Neuralink have stock?',
+  'Is there any good or interesting stock for now?',
   'What does sentiment say about AAPL?',
-  'Compare MSFT momentum and risk',
+  'Explain what RSI means in simple terms',
 ]
 
 const watchlist = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMD', 'META']
@@ -301,7 +301,7 @@ function MessageBubble({ message }) {
         {message.loading ? (
           <div className={styles.typing}>
             <Loader2 size={16} />
-            Reading market data and news sentiment...
+            Thinking...
           </div>
         ) : (
           <>
@@ -322,7 +322,7 @@ export default function ChatbotPage() {
     {
       id: 'welcome',
       role: 'assistant',
-      text: 'Ask me about a public ticker, company name, stock status, risk, or related news. Try "Analyze NVDA news", "Is Tesla risky?", or "Does Neuralink have stock?"',
+      text: 'Hi! I\'m your financial copilot. Ask me anything — stock analysis, market questions, investment concepts, or general finance topics. Try "Analyze NVDA", "Is Tesla risky?", or "What\'s a good stock to look at?"',
     },
   ])
   const [activeResult, setActiveResult] = useState(null)
@@ -361,25 +361,14 @@ export default function ChatbotPage() {
     setMessages(current => [...current, userMessage])
     setInput('')
 
-    if (!ticker) {
-      if (privateCompany) {
-        setMessages(current => [
-          ...current,
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            text: privateCompany.text,
-          },
-        ])
-        return
-      }
-
+    // Private company check (instant response, no API call needed)
+    if (privateCompany && isCompanyStatusQuestion(trimmed)) {
       setMessages(current => [
         ...current,
         {
           id: crypto.randomUUID(),
           role: 'assistant',
-          text: buildGeneralFallback(trimmed),
+          text: privateCompany.text,
         },
       ])
       return
@@ -389,21 +378,59 @@ export default function ChatbotPage() {
     const loadingId = crypto.randomUUID()
     setMessages(current => [...current, { id: loadingId, role: 'assistant', loading: true }])
 
+    // If a ticker is found, do the stock analysis flow
+    if (ticker) {
+      try {
+        const result = await analyzeStock(ticker)
+        setActiveResult(result)
+        setMessages(current => current.map(message =>
+          message.id === loadingId
+            ? { id: loadingId, role: 'assistant', result }
+            : message
+        ))
+      } catch (error) {
+        setMessages(current => current.map(message =>
+          message.id === loadingId
+            ? {
+                id: loadingId,
+                role: 'assistant',
+                text: error.message || `I could not analyze ${ticker}. Try another ticker or check the API URL.`,
+              }
+            : message
+        ))
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+
+    // No ticker found — use AI chat for natural conversation
     try {
-      const result = await analyzeStock(ticker)
-      setActiveResult(result)
+      // Build conversation history from recent messages
+      const history = messages
+        .filter(m => m.role && m.text && !m.loading)
+        .slice(-6)
+        .map(m => ({ role: m.role, content: m.text }))
+
+      const chatResult = await chatWithAI(trimmed, history)
       setMessages(current => current.map(message =>
         message.id === loadingId
-          ? { id: loadingId, role: 'assistant', result }
+          ? { id: loadingId, role: 'assistant', text: chatResult.reply }
           : message
       ))
+
+      // If the AI detected a ticker and returned stock data, show it in the side panel
+      if (chatResult.stock_data) {
+        setActiveResult(chatResult.stock_data)
+      }
     } catch (error) {
+      // Fallback if chat API is unavailable
       setMessages(current => current.map(message =>
         message.id === loadingId
           ? {
               id: loadingId,
               role: 'assistant',
-              text: error.message || `I could not analyze ${ticker}. Try another ticker or check the API URL.`,
+              text: buildGeneralFallback(trimmed),
             }
           : message
       ))
@@ -477,8 +504,8 @@ export default function ChatbotPage() {
             </div>
             <h1>Your stock research copilot</h1>
             <p className={styles.subtitle}>
-              I analyze public tickers, map company names to symbols, flag private vs. public status,
-              score risk, and read news sentiment. I don&apos;t give personalized financial advice.
+              I analyze public tickers, answer finance questions, explain concepts, map company names to symbols,
+              score risk, and read news sentiment. Ask me anything about markets!
             </p>
           </div>
           <div className={styles.topbarActions}>

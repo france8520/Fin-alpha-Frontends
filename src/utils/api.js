@@ -16,6 +16,18 @@ export async function analyzeStock(ticker) {
   return data
 }
 
+export async function chatWithAI(message, history = []) {
+  const base = getApiBase()
+  const res = await fetch(`${base}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.detail || 'Chat failed')
+  return data
+}
+
 export async function pingApi() {
   const base = getApiBase()
   try {
